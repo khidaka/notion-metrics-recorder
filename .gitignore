@@ -16,4 +16,8 @@ token.json
 
 # Log files
 *.log
-Library/Logs/notion-metrics-recorder/ 
+Library/Logs/notion-metrics-recorder/
+
+# macOS system files
+.DS_Store
+**/.DS_Store 

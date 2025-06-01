@@ -12,12 +12,4 @@ token.json
 
 # IDE settings
 .vscode/
-.idea/
-
-# Log files
-*.log
-Library/Logs/notion-metrics-recorder/
-
-# macOS system files
-.DS_Store
-**/.DS_Store 
+.idea/ 

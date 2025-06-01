@@ -7,7 +7,6 @@ Notionデータベースのレコード数を定期的に記録し、Google Spre
 - Notionデータベースのレコード数を取得
 - 取得したデータをGoogle Spreadsheetに記録
 - 日時とレコード数を自動的に記録
-- macOSのLaunchAgentとして自動実行可能
 
 ## セットアップ
 
@@ -59,38 +58,17 @@ cp .env.example .env
 
 ## 使用方法
 
-### 手動実行
-
 ```bash
 python notion-metrics-recorder.py
 ```
 
 初回実行時は、Google認証のためのブラウザが開きます。認証を完了すると、Notionのレコード数がGoogle Spreadsheetに記録されます。
 
-### 自動実行（macOS）
-
-1. スクリプトに実行権限を付与
-```bash
-chmod +x run.sh install.sh
-```
-
-2. LaunchAgentとしてインストール
-```bash
-./install.sh
-```
-
-これにより、システム起動時に自動的に実行され、1時間ごとにNotionのレコード数を記録します。
-
-ログは以下の場所に出力されます：
-- 標準出力: `~/Library/Logs/notion-metrics-recorder/stdout.log`
-- エラー出力: `~/Library/Logs/notion-metrics-recorder/stderr.log`
-
 ## 注意事項
 
 - `.env`ファイルと`credentials.json`はGitにコミットしないでください
 - 認証情報は適切に管理してください
 - 初回実行時のみGoogle認証が必要です
-- 自動実行時は、初回のGoogle認証を手動で行う必要があります
 
 ## ライセンス
 

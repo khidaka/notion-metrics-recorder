@@ -16,5 +16,5 @@ SHEET_NAME = os.getenv('GOOGLE_SHEET_NAME', 'notion-metrics-recorder')
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
 # File paths
-CREDENTIALS_FILE = 'credentials.json'
-TOKEN_FILE = 'token.json' 
+CREDENTIALS_FILE = '/Users/hidaka/Documents/GitHub/notion-metrics-recorder/credentials.json'
+TOKEN_FILE = "/Users/hidaka/Documents/GitHub/notion-metrics-recorder/token.json"

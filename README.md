@@ -1,106 +1,117 @@
 # Notion Metrics Recorder
 
-Notionデータベースのレコード数を定期的に記録し、Google Spreadsheetに保存するツールです。
+複数のNotionデータベースのメトリクスをGoogle Spreadsheetに記録するPythonスクリプトです。
 
 ## 機能
 
-- 2つのNotionデータベースのレコード数を取得
-- 取得したデータをGoogle Spreadsheetに記録
-- 日時と各データベースのレコード数を自動的に記録
-- macOSのLaunchAgentとして自動実行可能
+- 最大5つのNotionデータベースのメトリクスを記録
+- 未定義のデータベースは自動的にスキップ
+- タイムスタンプ付きでGoogle Spreadsheetにデータを記録
+- 詳細なログ記録によるエラーハンドリング
+- 任意設定のデータベースに対応
 
-## セットアップ
+## 前提条件
 
-### 前提条件
-
-- Python 3.8以上
+- Python 3.7以上
 - Notion APIキー
-- Google Cloud Platformのプロジェクトと認証情報
+- Google Cloudプロジェクト（Sheets API有効化済み）
+- Google API認証情報
 
-### インストール
+## インストール
 
-1. リポジトリをクローン
+1. リポジトリをクローン:
 ```bash
 git clone https://github.com/yourusername/notion-metrics-recorder.git
 cd notion-metrics-recorder
 ```
 
-2. 仮想環境を作成してアクティベート
+2. 仮想環境を作成してアクティベート:
 ```bash
-python3 -m venv venv
-source venv/bin/activate  # Linuxの場合
-# または
-.\venv\Scripts\activate  # Windowsの場合
+python -m venv venv
+source venv/bin/activate  # Windowsの場合: venv\Scripts\activate
 ```
 
-3. 必要なパッケージをインストール
+3. 依存パッケージをインストール:
 ```bash
 pip install -r requirements.txt
 ```
 
-### 設定
+## 設定
 
-1. `.env.example`を`.env`にコピーして、必要な情報を設定
-```bash
-cp .env.example .env
+1. プロジェクトのルートディレクトリに`.env`ファイルを作成し、以下の変数を設定:
+```env
+# Notion API設定
+NOTION_API_KEY=your_notion_api_key_here
+NOTION_DATABASE_ID_1=your_first_database_id_here
+NOTION_DATABASE_ID_2=your_second_database_id_here
+NOTION_DATABASE_ID_3=your_third_database_id_here  # 任意
+NOTION_DATABASE_ID_4=your_fourth_database_id_here  # 任意
+NOTION_DATABASE_ID_5=your_fifth_database_id_here  # 任意
+
+# Google Spreadsheet設定
+GOOGLE_SPREADSHEET_ID=your_spreadsheet_id_here
+GOOGLE_SHEET_NAME=notion-metrics-recorder
+
+# Google APIファイルパス
+GOOGLE_CREDENTIALS_FILE=credentials.json
+GOOGLE_TOKEN_FILE=token.json
 ```
 
-2. `.env`ファイルに以下の情報を設定
-- `NOTION_API_KEY`: NotionのAPIキー
-- `NOTION_DATABASE_ID1`: 1つ目のNotionデータベースID
-- `NOTION_DATABASE_ID2`: 2つ目のNotionデータベースID
-- `GOOGLE_SPREADSHEET_ID`: 記録先のGoogle Spreadsheet ID
-- `GOOGLE_SHEET_NAME`: 記録先のシート名
-
-3. Google Cloud Platformで認証情報を設定
-- Google Cloud Consoleでプロジェクトを作成
-- Google Sheets APIを有効化
-- OAuth 2.0クライアントIDを作成
-- 認証情報をダウンロードして`credentials.json`として保存
+2. Google API認証情報の設定:
+   - Google Cloud Consoleにアクセス
+   - 新しいプロジェクトを作成
+   - Google Sheets APIを有効化
+   - 認証情報（OAuth 2.0クライアントID）を作成
+   - 認証情報をダウンロードして`credentials.json`として保存
 
 ## 使用方法
 
-### 手動実行
-
+スクリプトを実行:
 ```bash
 python notion-metrics-recorder.py
 ```
 
-初回実行時は、Google認証のためのブラウザが開きます。認証を完了すると、Notionのレコード数がGoogle Spreadsheetに記録されます。
+スクリプトは以下の処理を行います:
+1. 設定された各Notionデータベースのレコード数をカウント
+2. 未定義のデータベースをスキップ
+3. タイムスタンプと共にGoogle Spreadsheetに記録
+4. すべてのアクティビティとエラーをログに記録
 
-### 自動実行（macOS）
+## 出力形式
 
-1. スクリプトに実行権限を付与
-```bash
-chmod +x run.sh install.sh
-```
+Google Spreadsheetには以下の列が含まれます:
+- タイムスタンプ
+- データベース1のレコード数
+- データベース2のレコード数
+- データベース3のレコード数（未定義の場合は空欄）
+- データベース4のレコード数（未定義の場合は空欄）
+- データベース5のレコード数（未定義の場合は空欄）
 
-2. LaunchAgentとしてインストール
-```bash
-./install.sh
-```
+## エラーハンドリング
 
-これにより、システム起動時に自動的に実行され、1時間ごとにNotionのレコード数を記録します。
+- 未定義のデータベースはエラーを発生させずにスキップ
+- APIエラーは詳細をログに記録
+- 認証エラーは適切に処理
+- すべてのエラーはログファイルに記録
 
-ログは以下の場所に出力されます：
-- 標準出力: `~/Library/Logs/notion-metrics-recorder/stdout.log`
-- エラー出力: `~/Library/Logs/notion-metrics-recorder/stderr.log`
+## ログ記録
 
-## データ形式
+ログは以下のファイルに出力されます:
+- `stdout.log`: 標準出力
+- `stderr.log`: エラーメッセージ
 
-Google Spreadsheetには以下の形式でデータが記録されます：
+## コントリビューション
 
-- A列: 日時（YYYY-MM-DD HH:MM:SS）
-- B列: データベース1のレコード数
-- C列: データベース2のレコード数
-
-## 注意事項
-
-- `.env`ファイルと`credentials.json`はGitにコミットしないでください
-- 認証情報は適切に管理してください
-- 初回実行時のみGoogle認証が必要です
-- 自動実行時は、初回のGoogle認証を手動で行う必要があります
+1. リポジトリをフォーク
+2. 機能ブランチを作成
+3. 変更をコミット
+4. ブランチにプッシュ
+5. プルリクエストを作成
 
 ## ライセンス
 
-MIT License
+このプロジェクトはMITライセンスの下で公開されています - 詳細はLICENSEファイルを参照してください。
+
+## アーキテクチャ決定記録
+
+このプロジェクトの設計決定の詳細については、[アーキテクチャ決定記録](docs/adr/)を参照してください。

@@ -28,8 +28,6 @@ def validate_config():
     """Validate that all required configuration values are present"""
     required_vars = {
         'NOTION_API_KEY': NOTION_API_KEY,
-        'NOTION_DATABASE_ID1': NOTION_DATABASE_ID1,
-        'NOTION_DATABASE_ID2': NOTION_DATABASE_ID2,
         'SPREADSHEET_ID': SPREADSHEET_ID
     }
     
@@ -39,6 +37,10 @@ def validate_config():
 
 def count_notion_records(database_id):
     """Count records in Notion database with improved error handling"""
+    if not database_id:
+        logger.warning(f"Skipping undefined database ID")
+        return None
+
     url = f"https://api.notion.com/v1/databases/{database_id}/query"
     headers = {
         "Authorization": f"Bearer {NOTION_API_KEY}",
@@ -101,7 +103,7 @@ def get_google_credentials():
         logger.error(f"Failed to get Google credentials: {str(e)}")
         raise GoogleSheetsError(f"Authentication failed: {str(e)}")
 
-def append_to_google_sheet(count1, count2):
+def append_to_google_sheet(counts):
     """Append data to Google Sheet with improved error handling"""
     try:
         creds = get_google_credentials()
@@ -109,7 +111,7 @@ def append_to_google_sheet(count1, count2):
         sheet = service.spreadsheets()
 
         now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        values = [[now, count1, count2]]
+        values = [[now] + [str(count) if count is not None else "" for count in counts]]
         body = {'values': values}
 
         result = sheet.values().append(
@@ -120,7 +122,7 @@ def append_to_google_sheet(count1, count2):
             body=body
         ).execute()
 
-        logger.info(f"Successfully appended records to Google Sheet: Database1={count1}, Database2={count2}")
+        logger.info(f"Successfully appended records to Google Sheet: {counts}")
         return result
 
     except HttpError as e:
@@ -134,11 +136,22 @@ def main():
     """Main function with proper error handling"""
     try:
         validate_config()
-        count1 = count_notion_records(NOTION_DATABASE_ID1)
-        count2 = count_notion_records(NOTION_DATABASE_ID2)
-        if count1 is not None and count2 is not None:
-            append_to_google_sheet(count1, count2)
-            logger.info("Process completed successfully")
+        
+        # Count records for all databases
+        counts = []
+        for db_id in [NOTION_DATABASE_ID1, NOTION_DATABASE_ID2, NOTION_DATABASE_ID3, 
+                     NOTION_DATABASE_ID4, NOTION_DATABASE_ID5]:
+            try:
+                count = count_notion_records(db_id)
+                counts.append(count)
+            except NotionAPIError as e:
+                logger.warning(f"Skipping database due to error: {str(e)}")
+                counts.append(None)
+        
+        # Append all counts to Google Sheet
+        append_to_google_sheet(counts)
+        logger.info("Process completed successfully")
+        
     except (NotionAPIError, GoogleSheetsError, ValueError) as e:
         logger.error(f"Process failed: {str(e)}")
         return 1

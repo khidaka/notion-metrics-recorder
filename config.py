@@ -6,7 +6,8 @@ load_dotenv()
 
 # Notion API settings
 NOTION_API_KEY = os.getenv('NOTION_API_KEY')
-DATABASE_ID = os.getenv('NOTION_DATABASE_ID')
+NOTION_DATABASE_ID1 = os.getenv('NOTION_DATABASE_ID1')
+NOTION_DATABASE_ID2 = os.getenv('NOTION_DATABASE_ID2')
 
 # Google Sheets settings
 SPREADSHEET_ID = os.getenv('GOOGLE_SPREADSHEET_ID')

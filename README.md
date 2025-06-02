@@ -4,9 +4,9 @@ Notionデータベースのレコード数を定期的に記録し、Google Spre
 
 ## 機能
 
-- Notionデータベースのレコード数を取得
+- 2つのNotionデータベースのレコード数を取得
 - 取得したデータをGoogle Spreadsheetに記録
-- 日時とレコード数を自動的に記録
+- 日時と各データベースのレコード数を自動的に記録
 - macOSのLaunchAgentとして自動実行可能
 
 ## セットアップ
@@ -47,7 +47,8 @@ cp .env.example .env
 
 2. `.env`ファイルに以下の情報を設定
 - `NOTION_API_KEY`: NotionのAPIキー
-- `NOTION_DATABASE_ID`: 対象のNotionデータベースID
+- `NOTION_DATABASE_ID1`: 1つ目のNotionデータベースID
+- `NOTION_DATABASE_ID2`: 2つ目のNotionデータベースID
 - `GOOGLE_SPREADSHEET_ID`: 記録先のGoogle Spreadsheet ID
 - `GOOGLE_SHEET_NAME`: 記録先のシート名
 
@@ -84,6 +85,14 @@ chmod +x run.sh install.sh
 ログは以下の場所に出力されます：
 - 標準出力: `~/Library/Logs/notion-metrics-recorder/stdout.log`
 - エラー出力: `~/Library/Logs/notion-metrics-recorder/stderr.log`
+
+## データ形式
+
+Google Spreadsheetには以下の形式でデータが記録されます：
+
+- A列: 日時（YYYY-MM-DD HH:MM:SS）
+- B列: データベース1のレコード数
+- C列: データベース2のレコード数
 
 ## 注意事項
 

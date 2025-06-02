@@ -28,7 +28,8 @@ def validate_config():
     """Validate that all required configuration values are present"""
     required_vars = {
         'NOTION_API_KEY': NOTION_API_KEY,
-        'DATABASE_ID': DATABASE_ID,
+        'NOTION_DATABASE_ID1': NOTION_DATABASE_ID1,
+        'NOTION_DATABASE_ID2': NOTION_DATABASE_ID2,
         'SPREADSHEET_ID': SPREADSHEET_ID
     }
     
@@ -36,9 +37,9 @@ def validate_config():
     if missing_vars:
         raise ValueError(f"Missing required environment variables: {', '.join(missing_vars)}")
 
-def count_notion_records():
+def count_notion_records(database_id):
     """Count records in Notion database with improved error handling"""
-    url = f"https://api.notion.com/v1/databases/{DATABASE_ID}/query"
+    url = f"https://api.notion.com/v1/databases/{database_id}/query"
     headers = {
         "Authorization": f"Bearer {NOTION_API_KEY}",
         "Notion-Version": "2022-06-28",
@@ -64,7 +65,7 @@ def count_notion_records():
             has_more = data.get("has_more", False)
             next_cursor = data.get("next_cursor", None)
 
-        logger.info(f"Successfully counted {total_records} records in Notion database")
+        logger.info(f"Successfully counted {total_records} records in Notion database {database_id}")
         return total_records
 
     except requests.exceptions.RequestException as e:
@@ -100,7 +101,7 @@ def get_google_credentials():
         logger.error(f"Failed to get Google credentials: {str(e)}")
         raise GoogleSheetsError(f"Authentication failed: {str(e)}")
 
-def append_to_google_sheet(record_count):
+def append_to_google_sheet(count1, count2):
     """Append data to Google Sheet with improved error handling"""
     try:
         creds = get_google_credentials()
@@ -108,7 +109,7 @@ def append_to_google_sheet(record_count):
         sheet = service.spreadsheets()
 
         now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        values = [[now, record_count]]
+        values = [[now, count1, count2]]
         body = {'values': values}
 
         result = sheet.values().append(
@@ -119,7 +120,7 @@ def append_to_google_sheet(record_count):
             body=body
         ).execute()
 
-        logger.info(f"Successfully appended {record_count} records to Google Sheet")
+        logger.info(f"Successfully appended records to Google Sheet: Database1={count1}, Database2={count2}")
         return result
 
     except HttpError as e:
@@ -133,9 +134,10 @@ def main():
     """Main function with proper error handling"""
     try:
         validate_config()
-        count = count_notion_records()
-        if count is not None:
-            append_to_google_sheet(count)
+        count1 = count_notion_records(NOTION_DATABASE_ID1)
+        count2 = count_notion_records(NOTION_DATABASE_ID2)
+        if count1 is not None and count2 is not None:
+            append_to_google_sheet(count1, count2)
             logger.info("Process completed successfully")
     except (NotionAPIError, GoogleSheetsError, ValueError) as e:
         logger.error(f"Process failed: {str(e)}")

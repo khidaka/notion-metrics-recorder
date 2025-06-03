@@ -9,6 +9,7 @@
 - タイムスタンプ付きでGoogle Spreadsheetにデータを記録
 - 詳細なログ記録によるエラーハンドリング
 - 任意設定のデータベースに対応
+- 1日1回の実行制限（`--force`オプションで強制実行可能）
 
 ## 前提条件
 
@@ -71,11 +72,17 @@ GOOGLE_TOKEN_FILE=token.json
 python notion-metrics-recorder.py
 ```
 
+強制実行（1日1回の制限を無視）:
+```bash
+python notion-metrics-recorder.py --force
+```
+
 スクリプトは以下の処理を行います:
-1. 設定された各Notionデータベースのレコード数をカウント
-2. 未定義のデータベースをスキップ
-3. タイムスタンプと共にGoogle Spreadsheetに記録
-4. すべてのアクティビティとエラーをログに記録
+1. 実行制限のチェック（`--force`オプションがない場合）
+2. 設定された各Notionデータベースのレコード数をカウント
+3. 未定義のデータベースをスキップ
+4. タイムスタンプと共にGoogle Spreadsheetに記録
+5. すべてのアクティビティとエラーをログに記録
 
 ## 出力形式
 

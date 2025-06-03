@@ -160,5 +160,28 @@ def main():
         return 1
     return 0
 
+def should_run_today(force=False):
+    """
+    Returns True if:
+    - 'force' is True（コマンドライン引数で強制実行時）
+    - または本日未実行の場合（/tmp/notion_metrics_{YYYYMMDD}.flag ファイルがない場合）
+    """
+    if force:
+        return True
+    today_str = datetime.datetime.now().strftime("%Y%m%d")
+    flag_path = f"/tmp/notion_metrics_{today_str}.flag"
+    if not os.path.exists(flag_path):
+        # 実行記録ファイルを作成
+        with open(flag_path, "w") as f:
+            f.write("executed\n")
+        return True
+    return False
+
 if __name__ == "__main__":
-    exit(main())
+    import sys
+    force = "--force" in sys.argv
+    if should_run_today(force=force):
+        exit(main())
+    else:
+        logging.info("Already executed today (use --force to run manually)")
+        exit(0)
